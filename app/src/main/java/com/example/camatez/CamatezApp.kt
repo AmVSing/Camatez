@@ -1,6 +1,7 @@
 package com.example.camatez
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +34,11 @@ fun CamatezApp() {
 
             AppScreen.Config -> {
                 val setupViewModel: SetupViewModel = viewModel()
+
+                LaunchedEffect(currentConfig) {
+                    setupViewModel.loadConfig(currentConfig)
+                }
+
                 SetupScreen(
                     viewModel = setupViewModel,
                     onSaveConfig = { config ->

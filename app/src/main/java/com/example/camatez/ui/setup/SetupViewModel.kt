@@ -76,6 +76,28 @@ class SetupViewModel : ViewModel() {
         }
     }
 
+    fun loadConfig(config: Config) {
+        _uiState.value = SetupUIState(
+            addEnabled = Operation.ADD in config.enabledOperations,
+            subtractEnabled = Operation.SUBTRACT in config.enabledOperations,
+            multiplyEnabled = Operation.MULTIPLY in config.enabledOperations,
+            divideEnabled = Operation.DIVIDE in config.enabledOperations,
+
+            addLhsMin = config.addLhsRange.first.toString(),
+            addLhsMax = config.addLhsRange.last.toString(),
+            addRhsMin = config.addRhsRange.first.toString(),
+            addRhsMax = config.addRhsRange.last.toString(),
+
+            mulLhsMin = config.mulLhsRange.first.toString(),
+            mulLhsMax = config.mulLhsRange.last.toString(),
+            mulRhsMin = config.mulRhsRange.first.toString(),
+            mulRhsMax = config.mulRhsRange.last.toString(),
+
+            duration = config.duration,
+            errorMessage = null,
+        )
+    }
+
     private fun parseRange(minText: String, maxText: String, label: String): IntRange? {
         val min = minText.toIntOrNull()
         val max = maxText.toIntOrNull()
@@ -101,3 +123,4 @@ class SetupViewModel : ViewModel() {
         _uiState.value = transform(_uiState.value)
     }
 }
+
