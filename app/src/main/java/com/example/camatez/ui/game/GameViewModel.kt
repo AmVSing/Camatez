@@ -3,7 +3,8 @@ package com.example.camatez.ui.game
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.camatez.data.HighScores
+import com.example.camatez.data.scores.CamatezDatabase
+import com.example.camatez.data.scores.ScoreRepository
 import com.example.camatez.domain.Config
 import com.example.camatez.domain.QuestionGenerator
 import kotlinx.coroutines.Job
@@ -17,25 +18,27 @@ class GameViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
 
+    private val scoreRepository =
+        ScoreRepository(CamatezDatabase.getInstance(application).dailyScoreDao())
     private val questionGenerator = QuestionGenerator()
-    private val HighScores = HighScores(application)
 
     private val _uiState = MutableStateFlow(GameUIState())
     val uiState: StateFlow<GameUIState> = _uiState.asStateFlow()
 
     private var timerJob: Job? = null
+    private var bestScoreJob: Job? = null
     private var currentConfig: Config? = null
-
-    init {
-        viewModelScope.launch {
-            HighScores.highScoreFlow.collect { highScore ->
-                _uiState.value = _uiState.value.copy(highScore = highScore)
-            }
-        }
-    }
 
     fun startGame(config: Config) {
         currentConfig = config
+
+        bestScoreJob?.cancel()
+        bestScoreJob = viewModelScope.launch {
+            scoreRepository.observeBestScoreForDuration(config.duration).collect { best ->
+                _uiState.value = _uiState.value.copy(highScore = best)
+            }
+        }
+
         _uiState.value = GameUIState(
             currentQuestion = questionGenerator.generate(config),
             currentInput = "",
@@ -109,16 +112,20 @@ class GameViewModel(
         timerJob?.cancel()
 
         val finalScore = _uiState.value.score
+        val config = currentConfig ?: return
+
+        viewModelScope.launch {
+            scoreRepository.recordTodayScore(
+                duration = config.duration,
+                score = finalScore,
+            )
+        }
 
         _uiState.value = _uiState.value.copy(
             isRunning = false,
             isFinished = true,
             highScore = maxOf(_uiState.value.highScore, finalScore),
         )
-
-        viewModelScope.launch {
-            HighScores.saveIfHigher(finalScore)
-        }
     }
 
     fun dismissGameOver() {
@@ -128,5 +135,6 @@ class GameViewModel(
     override fun onCleared() {
         super.onCleared()
         timerJob?.cancel()
+        bestScoreJob?.cancel()
     }
 }

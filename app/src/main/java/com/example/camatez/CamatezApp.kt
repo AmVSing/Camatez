@@ -13,6 +13,7 @@ import com.example.camatez.ui.game.GameScreen
 import com.example.camatez.ui.game.GameViewModel
 import com.example.camatez.ui.menu.MainMenuScreen
 import com.example.camatez.ui.scores.HighScoresScreen
+import com.example.camatez.ui.scores.HighScoresViewModel
 import com.example.camatez.ui.setup.SetupScreen
 import com.example.camatez.ui.setup.SetupViewModel
 import com.example.camatez.ui.theme.CamatezTheme
@@ -52,7 +53,9 @@ fun CamatezApp() {
             }
 
             AppScreen.HighScores -> {
+                val highScoresViewModel: HighScoresViewModel = viewModel()
                 HighScoresScreen(
+                    viewModel = highScoresViewModel,
                     onBackToMenu = {
                         screen = AppScreen.MainMenu
                     },

@@ -179,7 +179,7 @@ fun SetupScreen(
             ),
         ) {
             Text(
-                text = "Start",
+                text = "Save",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
             )
