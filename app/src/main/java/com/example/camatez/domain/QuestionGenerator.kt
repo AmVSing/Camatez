@@ -28,7 +28,7 @@ class QuestionGenerator(
             Operation.ADD -> settings.addLhsRange.nonZeroValues().isNotEmpty() && settings.addRhsRange.nonZeroValues().isNotEmpty()
             Operation.SUBTRACT -> validSubtractRhs(settings).isNotEmpty()
             Operation.MULTIPLY -> settings.mulLhsRange.nonZeroValues().isNotEmpty() && settings.mulRhsRange.nonZeroValues().isNotEmpty()
-            Operation.DIVIDE -> validDivideRhs(settings).isNotEmpty()
+            Operation.DIVIDE -> validDividePairs(settings).isNotEmpty()
         }
 
     private fun generateAdd(settings: Settings): Question {
@@ -73,17 +73,16 @@ class QuestionGenerator(
     }
 
     private fun generateDivide(settings: Settings): Question {
-        val rhsCandidates = validDivideRhs(settings)
-        require(rhsCandidates.isNotEmpty()) { "No valid division questions can be generated." }
-        val rhs = rhsCandidates.random(rng)
-        val lhsCandidates = settings.mulLhsRange.nonZeroValues().filter { it % rhs == 0 }
-        val lhs = lhsCandidates.random(rng)
+        val validPairs = validDividePairs(settings)
+        require(validPairs.isNotEmpty()) { "No valid division questions can be generated." }
+        val (answer, rhs) = validPairs.random(rng)
+        val lhs = answer * rhs
 
         return Question(
             lhs = lhs,
             rhs = rhs,
             op = Operation.DIVIDE,
-            ans = lhs / rhs,
+            ans = answer,
         )
     }
 
@@ -102,10 +101,15 @@ class QuestionGenerator(
         }
     }
 
-    private fun validDivideRhs(settings: Settings): List<Int> {
-        val lhsCandidates = settings.mulLhsRange.nonZeroValues()
-        return settings.mulRhsRange.nonZeroValues().filter { rhs ->
-            lhsCandidates.any { lhs -> lhs % rhs == 0 }
+    private fun validDividePairs(settings: Settings): List<Pair<Int, Int>> =
+        settings.mulLhsRange.nonZeroValues().flatMap { answer ->
+            settings.mulRhsRange.nonZeroValues().mapNotNull { rhs ->
+                val dividend = answer.toLong() * rhs.toLong()
+                if (dividend in Int.MIN_VALUE..Int.MAX_VALUE) {
+                    answer to rhs
+                } else {
+                    null
+                }
+            }
         }
-    }
 }
