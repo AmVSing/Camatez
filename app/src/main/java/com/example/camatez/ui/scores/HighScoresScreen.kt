@@ -73,7 +73,9 @@ fun HighScoresScreen(
         }
 
         Surface(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(260.dp),
             color = MaterialTheme.colorScheme.surface,
         ) {
             if (uiState.scores.isEmpty()) {
@@ -86,6 +88,32 @@ fun HighScoresScreen(
                 ) {
                     Text(
                         text = "No scores yet for ${uiState.selectedDuration}s",
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+            } else {
+                HighScoresChart(
+                    scores = uiState.scores,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
+
+        Surface(
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.surface,
+        ) {
+            if (uiState.scores.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = "Play a game to start building score history.",
                         color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.bodyLarge,
                     )
