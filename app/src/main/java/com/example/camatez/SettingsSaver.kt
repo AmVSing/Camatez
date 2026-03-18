@@ -23,7 +23,6 @@ val SettingsSaver: Saver<Settings?, Any> =
             )
         },
         restore = { value ->
-            if (value == null) return@Saver null
 
             val list = value as List<*>
 

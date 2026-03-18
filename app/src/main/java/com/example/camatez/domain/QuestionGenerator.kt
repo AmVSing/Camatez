@@ -6,7 +6,11 @@ class QuestionGenerator(
     private val rng: Random = Random.Default,
 ) {
     fun generate(settings: Settings): Question {
-        val operation = settings.enabledOperations.random(rng)
+        val operation =
+            settings.enabledOperations
+                .filter { operation -> canGenerate(settings, operation) }
+                .randomOrNull(rng)
+                ?: throw IllegalArgumentException("No valid questions can be generated for the current settings.")
 
         return when (operation) {
             Operation.ADD -> generateAdd(settings)
@@ -15,6 +19,17 @@ class QuestionGenerator(
             Operation.DIVIDE -> generateDivide(settings)
         }
     }
+
+    private fun canGenerate(
+        settings: Settings,
+        operation: Operation,
+    ): Boolean =
+        when (operation) {
+            Operation.ADD -> settings.addLhsRange.nonZeroValues().isNotEmpty() && settings.addRhsRange.nonZeroValues().isNotEmpty()
+            Operation.SUBTRACT -> validSubtractRhs(settings).isNotEmpty()
+            Operation.MULTIPLY -> settings.mulLhsRange.nonZeroValues().isNotEmpty() && settings.mulRhsRange.nonZeroValues().isNotEmpty()
+            Operation.DIVIDE -> validDivideRhs(settings).isNotEmpty()
+        }
 
     private fun generateAdd(settings: Settings): Question {
         val lhs = settings.addLhsRange.randint()
@@ -29,12 +44,13 @@ class QuestionGenerator(
     }
 
     private fun generateSubtract(settings: Settings): Question {
-        val rhs = settings.addRhsRange.randint()
-        val lhsCandidates = settings.addLhsRange.filter { it != 0 && it >= rhs }
-        require(lhsCandidates.isNotEmpty()) {
-            "No valid subtraction lhs values for rhs=$rhs in ${settings.addLhsRange}"
-        }
-        val lhs = lhsCandidates.random(rng)
+        val lhsCandidates = settings.addLhsRange.nonZeroValues()
+        val rhsCandidates = validSubtractRhs(settings)
+        require(rhsCandidates.isNotEmpty()) { "No valid subtraction questions can be generated." }
+        val rhs = rhsCandidates.random(rng)
+        val validLhs = lhsCandidates.filter { it >= rhs }
+        require(validLhs.isNotEmpty()) { "No valid subtraction lhs values for rhs=$rhs in ${settings.addLhsRange}" }
+        val lhs = validLhs.random(rng)
 
         return Question(
             lhs = lhs,
@@ -57,11 +73,10 @@ class QuestionGenerator(
     }
 
     private fun generateDivide(settings: Settings): Question {
-        val rhs = settings.mulRhsRange.randint()
-        val lhsCandidates = settings.mulLhsRange.filter { it != 0 && it % rhs == 0 }
-        require(lhsCandidates.isNotEmpty()) {
-            "No valid division lhs values for rhs=$rhs in ${settings.mulLhsRange}"
-        }
+        val rhsCandidates = validDivideRhs(settings)
+        require(rhsCandidates.isNotEmpty()) { "No valid division questions can be generated." }
+        val rhs = rhsCandidates.random(rng)
+        val lhsCandidates = settings.mulLhsRange.nonZeroValues().filter { it % rhs == 0 }
         val lhs = lhsCandidates.random(rng)
 
         return Question(
@@ -73,8 +88,24 @@ class QuestionGenerator(
     }
 
     private fun IntRange.randint(): Int {
-        val candidates = this.filter { it != 0 }
+        val candidates = nonZeroValues()
         require(candidates.isNotEmpty()) { "Invalid range" }
         return candidates.random(rng)
+    }
+
+    private fun IntRange.nonZeroValues(): List<Int> = this.filter { it != 0 }
+
+    private fun validSubtractRhs(settings: Settings): List<Int> {
+        val lhsCandidates = settings.addLhsRange.nonZeroValues()
+        return settings.addRhsRange.nonZeroValues().filter { rhs ->
+            lhsCandidates.any { lhs -> lhs >= rhs }
+        }
+    }
+
+    private fun validDivideRhs(settings: Settings): List<Int> {
+        val lhsCandidates = settings.mulLhsRange.nonZeroValues()
+        return settings.mulRhsRange.nonZeroValues().filter { rhs ->
+            lhsCandidates.any { lhs -> lhs % rhs == 0 }
+        }
     }
 }

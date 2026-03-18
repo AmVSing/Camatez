@@ -22,7 +22,7 @@ fun LoadingScreen() {
         contentAlignment = Alignment.Center,
     ) {
         Image(
-            painter = painterResource(R.mipmap.ic_launcher),
+            painter = painterResource(R.drawable.ic_launcher_foreground),
             contentDescription = null,
             modifier = Modifier.size(96.dp),
         )

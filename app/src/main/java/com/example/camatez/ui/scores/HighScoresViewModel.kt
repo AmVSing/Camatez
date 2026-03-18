@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.camatez.data.scores.CamatezDatabase
 import com.example.camatez.data.scores.ScoreRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +21,7 @@ class HighScoresViewModel(
 
     private val selectedDuration = MutableStateFlow(30)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<HighScoresUIState> =
         selectedDuration
             .flatMapLatest { duration ->
