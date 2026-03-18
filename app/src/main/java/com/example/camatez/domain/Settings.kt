@@ -1,6 +1,6 @@
 package com.example.camatez.domain
 
-data class Config(
+data class Settings(
     val enabledOperations: Set<Operation>,
     val addLhsRange: IntRange,
     val addRhsRange: IntRange,

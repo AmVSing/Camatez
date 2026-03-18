@@ -17,14 +17,15 @@ abstract class CamatezDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: CamatezDatabase? = null
 
-        fun getInstance(context: Context): CamatezDatabase {
-            return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: Room.databaseBuilder(
-                    context.applicationContext,
-                    CamatezDatabase::class.java,
-                    "camatez.db",
-                ).build().also { INSTANCE = it }
+        fun getInstance(context: Context): CamatezDatabase =
+            INSTANCE ?: synchronized(this) {
+                INSTANCE ?: Room
+                    .databaseBuilder(
+                        context.applicationContext,
+                        CamatezDatabase::class.java,
+                        "camatez.db",
+                    ).build()
+                    .also { INSTANCE = it }
             }
-        }
     }
 }

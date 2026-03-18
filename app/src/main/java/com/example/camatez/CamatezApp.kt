@@ -7,8 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.camatez.domain.Config
-import com.example.camatez.domain.defaultConfig
+import com.example.camatez.domain.Settings
+import com.example.camatez.domain.defaultSettings
 import com.example.camatez.ui.game.GameScreen
 import com.example.camatez.ui.game.GameViewModel
 import com.example.camatez.ui.menu.MainMenuScreen
@@ -21,29 +21,29 @@ import com.example.camatez.ui.theme.CamatezTheme
 @Composable
 fun CamatezApp() {
     var screen by remember { mutableStateOf<AppScreen>(AppScreen.MainMenu) }
-    var currentConfig by remember { mutableStateOf<Config>(defaultConfig()) }
+    var currentSettings by remember { mutableStateOf<Settings>(defaultSettings()) }
 
     CamatezTheme {
         when (screen) {
             AppScreen.MainMenu -> {
                 MainMenuScreen(
                     onPlay = { screen = AppScreen.Game },
-                    onConfig = { screen = AppScreen.Config },
+                    onConfig = { screen = AppScreen.Settings },
                     onHighScores = { screen = AppScreen.HighScores },
                 )
             }
 
-            AppScreen.Config -> {
+            AppScreen.Settings -> {
                 val setupViewModel: SetupViewModel = viewModel()
 
-                LaunchedEffect(currentConfig) {
-                    setupViewModel.loadConfig(currentConfig)
+                LaunchedEffect(currentSettings) {
+                    setupViewModel.loadConfig(currentSettings)
                 }
 
                 SetupScreen(
                     viewModel = setupViewModel,
                     onSaveConfig = { config ->
-                        currentConfig = config
+                        currentSettings = config
                         screen = AppScreen.MainMenu
                     },
                     onBackToMenu = {
@@ -66,7 +66,7 @@ fun CamatezApp() {
                 val gameViewModel: GameViewModel = viewModel()
                 GameScreen(
                     viewModel = gameViewModel,
-                    config = currentConfig,
+                    settings = currentSettings,
                     onQuitToMenu = {
                         screen = AppScreen.MainMenu
                     },

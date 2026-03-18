@@ -1,7 +1,7 @@
 package com.example.camatez.domain
 
-fun defaultConfig(): Config =
-    Config(
+fun defaultSettings(): Settings =
+    Settings(
         enabledOperations = setOf(Operation.ADD, Operation.SUBTRACT),
         addLhsRange = 2..100,
         addRhsRange = 2..100,

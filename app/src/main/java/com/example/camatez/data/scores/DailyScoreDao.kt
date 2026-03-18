@@ -13,9 +13,12 @@ interface DailyScoreDao {
         SELECT * FROM daily_scores
         WHERE date = :date AND duration = :duration
         LIMIT 1
-        """
+        """,
     )
-    suspend fun getScoreForDay(date: String, duration: Int): DailyScoreEntity?
+    suspend fun getScoreForDay(
+        date: String,
+        duration: Int,
+    ): DailyScoreEntity?
 
     @Query(
         """
@@ -23,16 +26,19 @@ interface DailyScoreDao {
         WHERE duration = :duration AND date < :date
         ORDER BY date DESC
         LIMIT 1
-        """
+        """,
     )
-    suspend fun getLatestScoreBeforeDate(date: String, duration: Int): DailyScoreEntity?
+    suspend fun getLatestScoreBeforeDate(
+        date: String,
+        duration: Int,
+    ): DailyScoreEntity?
 
     @Query(
         """
         SELECT * FROM daily_scores
         WHERE duration = :duration
         ORDER BY date ASC
-        """
+        """,
     )
     fun observeScoresForDuration(duration: Int): Flow<List<DailyScoreEntity>>
 
@@ -40,7 +46,7 @@ interface DailyScoreDao {
         """
         SELECT MAX(score) FROM daily_scores
         WHERE duration = :duration
-        """
+        """,
     )
     fun observeBestScoreForDuration(duration: Int): Flow<Int?>
 

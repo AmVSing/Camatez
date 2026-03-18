@@ -5,8 +5,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.camatez.data.scores.CamatezDatabase
 import com.example.camatez.data.scores.ScoreRepository
-import com.example.camatez.domain.Config
 import com.example.camatez.domain.QuestionGenerator
+import com.example.camatez.domain.Settings
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +17,6 @@ import kotlinx.coroutines.launch
 class GameViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
-
     private val scoreRepository =
         ScoreRepository(CamatezDatabase.getInstance(application).dailyScoreDao())
     private val questionGenerator = QuestionGenerator()
@@ -27,27 +26,29 @@ class GameViewModel(
 
     private var timerJob: Job? = null
     private var bestScoreJob: Job? = null
-    private var currentConfig: Config? = null
+    private var currentSettings: Settings? = null
 
-    fun startGame(config: Config) {
-        currentConfig = config
+    fun startGame(settings: Settings) {
+        currentSettings = settings
 
         bestScoreJob?.cancel()
-        bestScoreJob = viewModelScope.launch {
-            scoreRepository.observeBestScoreForDuration(config.duration).collect { best ->
-                _uiState.value = _uiState.value.copy(highScore = best)
+        bestScoreJob =
+            viewModelScope.launch {
+                scoreRepository.observeBestScoreForDuration(settings.duration).collect { best ->
+                    _uiState.value = _uiState.value.copy(highScore = best)
+                }
             }
-        }
 
-        _uiState.value = GameUIState(
-            currentQuestion = questionGenerator.generate(config),
-            currentInput = "",
-            score = 0,
-            highScore = _uiState.value.highScore,
-            timeRemaining = config.duration,
-            isRunning = true,
-            isFinished = false,
-        )
+        _uiState.value =
+            GameUIState(
+                currentQuestion = questionGenerator.generate(settings),
+                currentInput = "",
+                score = 0,
+                highScore = _uiState.value.highScore,
+                timeRemaining = settings.duration,
+                isRunning = true,
+                isFinished = false,
+            )
         startTimer()
     }
 
@@ -55,9 +56,10 @@ class GameViewModel(
         val state = _uiState.value
         if (!state.isRunning) return
 
-        _uiState.value = state.copy(
-            currentInput = state.currentInput + digit.toString(),
-        )
+        _uiState.value =
+            state.copy(
+                currentInput = state.currentInput + digit.toString(),
+            )
         checkAnswer()
     }
 
@@ -65,9 +67,10 @@ class GameViewModel(
         val state = _uiState.value
         if (!state.isRunning || state.currentInput.isEmpty()) return
 
-        _uiState.value = state.copy(
-            currentInput = state.currentInput.dropLast(1),
-        )
+        _uiState.value =
+            state.copy(
+                currentInput = state.currentInput.dropLast(1),
+            )
     }
 
     fun clearInput() {
@@ -81,38 +84,41 @@ class GameViewModel(
         val state = _uiState.value
         val question = state.currentQuestion ?: return
         val typed = state.currentInput.toIntOrNull() ?: return
-        val config = currentConfig ?: return
+        val config = currentSettings ?: return
 
         if (typed == question.ans) {
-            _uiState.value = state.copy(
-                score = state.score + 1,
-                currentInput = "",
-                currentQuestion = questionGenerator.generate(config),
-            )
+            _uiState.value =
+                state.copy(
+                    score = state.score + 1,
+                    currentInput = "",
+                    currentQuestion = questionGenerator.generate(config),
+                )
         }
     }
 
     private fun startTimer() {
         timerJob?.cancel()
-        timerJob = viewModelScope.launch {
-            while (_uiState.value.timeRemaining > 0) {
-                delay(1000)
-                val state = _uiState.value
-                if (!state.isRunning) return@launch
+        timerJob =
+            viewModelScope.launch {
+                while (_uiState.value.timeRemaining > 0) {
+                    delay(1000)
+                    val state = _uiState.value
+                    if (!state.isRunning) return@launch
 
-                _uiState.value = state.copy(
-                    timeRemaining = state.timeRemaining - 1,
-                )
+                    _uiState.value =
+                        state.copy(
+                            timeRemaining = state.timeRemaining - 1,
+                        )
+                }
+                finishGame()
             }
-            finishGame()
-        }
     }
 
     private fun finishGame() {
         timerJob?.cancel()
 
         val finalScore = _uiState.value.score
-        val config = currentConfig ?: return
+        val config = currentSettings ?: return
 
         viewModelScope.launch {
             scoreRepository.recordTodayScore(
@@ -121,11 +127,12 @@ class GameViewModel(
             )
         }
 
-        _uiState.value = _uiState.value.copy(
-            isRunning = false,
-            isFinished = true,
-            highScore = maxOf(_uiState.value.highScore, finalScore),
-        )
+        _uiState.value =
+            _uiState.value.copy(
+                isRunning = false,
+                isFinished = true,
+                highScore = maxOf(_uiState.value.highScore, finalScore),
+            )
     }
 
     fun dismissGameOver() {

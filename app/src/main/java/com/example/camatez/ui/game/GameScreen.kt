@@ -1,6 +1,5 @@
 package com.example.camatez.ui.game
 
-import android.view.KeyEvent as AndroidKeyEvent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,13 +35,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.camatez.domain.Config
+import com.example.camatez.domain.Settings
+import android.view.KeyEvent as AndroidKeyEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameScreen(
     viewModel: GameViewModel,
-    config: Config,
+    settings: Settings,
     onQuitToMenu: () -> Unit,
     onGoToMenuAfterGame: () -> Unit,
     modifier: Modifier = Modifier,
@@ -50,8 +50,8 @@ fun GameScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val focusRequester = remember { FocusRequester() }
 
-    LaunchedEffect(config) {
-        viewModel.startGame(config)
+    LaunchedEffect(settings) {
+        viewModel.startGame(settings)
         focusRequester.requestFocus()
     }
 
@@ -72,7 +72,7 @@ fun GameScreen(
             },
             confirmButton = {
                 TextButton(
-                    onClick = { viewModel.startGame(config) },
+                    onClick = { viewModel.startGame(settings) },
                 ) {
                     Text("Play again")
                 }
@@ -101,22 +101,23 @@ fun GameScreen(
         modifier = modifier,
     ) { innerPadding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(innerPadding)
-                .padding(16.dp)
-                .focusRequester(focusRequester)
-                .focusable()
-                .onPreviewKeyEvent { event ->
-                    handleGameKeyEvent(
-                        event = event,
-                        onDigit = viewModel::pressDigit,
-                        onBackspace = viewModel::backspace,
-                        onClear = viewModel::clearInput,
-                        onQuit = onQuitToMenu,
-                    )
-                },
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(innerPadding)
+                    .padding(16.dp)
+                    .focusRequester(focusRequester)
+                    .focusable()
+                    .onPreviewKeyEvent { event ->
+                        handleGameKeyEvent(
+                            event = event,
+                            onDigit = viewModel::pressDigit,
+                            onBackspace = viewModel::backspace,
+                            onClear = viewModel::clearInput,
+                            onQuit = onQuitToMenu,
+                        )
+                    },
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -157,9 +158,10 @@ fun GameScreen(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(72.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(72.dp),
                     color = MaterialTheme.colorScheme.surfaceVariant,
                     tonalElevation = 0.dp,
                 ) {

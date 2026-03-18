@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 private val Context.dataStore by preferencesDataStore(name = "high_scores")
+
 class HighScores(
     private val context: Context,
 ) {
@@ -15,9 +16,10 @@ class HighScores(
         val HIGH_SCORE_KEY = intPreferencesKey("high_score")
     }
 
-    val highScoreFlow: Flow<Int> = context.dataStore.data.map { preferences ->
-        preferences[HIGH_SCORE_KEY] ?: 0
-    }
+    val highScoreFlow: Flow<Int> =
+        context.dataStore.data.map { preferences ->
+            preferences[HIGH_SCORE_KEY] ?: 0
+        }
 
     suspend fun saveIfHigher(score: Int) {
         context.dataStore.edit { preferences ->

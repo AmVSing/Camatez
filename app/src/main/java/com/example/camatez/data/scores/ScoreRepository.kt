@@ -1,19 +1,17 @@
 package com.example.camatez.data.scores
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
 class ScoreRepository(
     private val dao: DailyScoreDao,
 ) {
-    fun observeScoresForDuration(duration: Int): Flow<List<DailyScoreEntity>> =
-        dao.observeScoresForDuration(duration)
+    fun observeScoresForDuration(duration: Int): Flow<List<DailyScoreEntity>> = dao.observeScoresForDuration(duration)
 
-    fun observeBestScoreForDuration(duration: Int): Flow<Int> =
-        dao.observeBestScoreForDuration(duration).map { it ?: 0 }
+    fun observeBestScoreForDuration(duration: Int): Flow<Int> = dao.observeBestScoreForDuration(duration).map { it ?: 0 }
 
     suspend fun recordTodayScore(
         duration: Int,

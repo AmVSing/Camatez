@@ -1,11 +1,11 @@
 package com.example.camatez.ui.setup
 
 import androidx.lifecycle.ViewModel
+import com.example.camatez.domain.Operation
+import com.example.camatez.domain.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import com.example.camatez.domain.Config
-import com.example.camatez.domain.Operation
 
 class SetupViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(SetupUIState())
@@ -28,28 +28,35 @@ class SetupViewModel : ViewModel() {
     }
 
     fun setAddLhsMin(value: String) = update { it.copy(addLhsMin = value, errorMessage = null) }
+
     fun setAddLhsMax(value: String) = update { it.copy(addLhsMax = value, errorMessage = null) }
+
     fun setAddRhsMin(value: String) = update { it.copy(addRhsMin = value, errorMessage = null) }
+
     fun setAddRhsMax(value: String) = update { it.copy(addRhsMax = value, errorMessage = null) }
 
     fun setMulLhsMin(value: String) = update { it.copy(mulLhsMin = value, errorMessage = null) }
+
     fun setMulLhsMax(value: String) = update { it.copy(mulLhsMax = value, errorMessage = null) }
+
     fun setMulRhsMin(value: String) = update { it.copy(mulRhsMin = value, errorMessage = null) }
+
     fun setMulRhsMax(value: String) = update { it.copy(mulRhsMax = value, errorMessage = null) }
 
     fun setDuration(duration: Int) {
         _uiState.value = _uiState.value.copy(duration = duration, errorMessage = null)
     }
 
-    fun buildConfigOrNull(): Config? {
+    fun buildConfigOrNull(): Settings? {
         val state = _uiState.value
 
-        val enabledOperations = buildSet {
-            if (state.addEnabled) add(Operation.ADD)
-            if (state.subtractEnabled) add(Operation.SUBTRACT)
-            if (state.multiplyEnabled) add(Operation.MULTIPLY)
-            if (state.divideEnabled) add(Operation.DIVIDE)
-        }
+        val enabledOperations =
+            buildSet {
+                if (state.addEnabled) add(Operation.ADD)
+                if (state.subtractEnabled) add(Operation.SUBTRACT)
+                if (state.multiplyEnabled) add(Operation.MULTIPLY)
+                if (state.divideEnabled) add(Operation.DIVIDE)
+            }
 
         if (enabledOperations.isEmpty()) {
             setError("Enable at least one operation.")
@@ -62,7 +69,7 @@ class SetupViewModel : ViewModel() {
         val mulRhsRange = parseRange(state.mulRhsMin, state.mulRhsMax, "Multiplication/Division RHS") ?: return null
 
         return try {
-            Config(
+            Settings(
                 enabledOperations = enabledOperations,
                 addLhsRange = addLhsRange,
                 addRhsRange = addRhsRange,
@@ -76,29 +83,31 @@ class SetupViewModel : ViewModel() {
         }
     }
 
-    fun loadConfig(config: Config) {
-        _uiState.value = SetupUIState(
-            addEnabled = Operation.ADD in config.enabledOperations,
-            subtractEnabled = Operation.SUBTRACT in config.enabledOperations,
-            multiplyEnabled = Operation.MULTIPLY in config.enabledOperations,
-            divideEnabled = Operation.DIVIDE in config.enabledOperations,
-
-            addLhsMin = config.addLhsRange.first.toString(),
-            addLhsMax = config.addLhsRange.last.toString(),
-            addRhsMin = config.addRhsRange.first.toString(),
-            addRhsMax = config.addRhsRange.last.toString(),
-
-            mulLhsMin = config.mulLhsRange.first.toString(),
-            mulLhsMax = config.mulLhsRange.last.toString(),
-            mulRhsMin = config.mulRhsRange.first.toString(),
-            mulRhsMax = config.mulRhsRange.last.toString(),
-
-            duration = config.duration,
-            errorMessage = null,
-        )
+    fun loadConfig(settings: Settings) {
+        _uiState.value =
+            SetupUIState(
+                addEnabled = Operation.ADD in settings.enabledOperations,
+                subtractEnabled = Operation.SUBTRACT in settings.enabledOperations,
+                multiplyEnabled = Operation.MULTIPLY in settings.enabledOperations,
+                divideEnabled = Operation.DIVIDE in settings.enabledOperations,
+                addLhsMin = settings.addLhsRange.first.toString(),
+                addLhsMax = settings.addLhsRange.last.toString(),
+                addRhsMin = settings.addRhsRange.first.toString(),
+                addRhsMax = settings.addRhsRange.last.toString(),
+                mulLhsMin = settings.mulLhsRange.first.toString(),
+                mulLhsMax = settings.mulLhsRange.last.toString(),
+                mulRhsMin = settings.mulRhsRange.first.toString(),
+                mulRhsMax = settings.mulRhsRange.last.toString(),
+                duration = settings.duration,
+                errorMessage = null,
+            )
     }
 
-    private fun parseRange(minText: String, maxText: String, label: String): IntRange? {
+    private fun parseRange(
+        minText: String,
+        maxText: String,
+        label: String,
+    ): IntRange? {
         val min = minText.toIntOrNull()
         val max = maxText.toIntOrNull()
 
@@ -123,4 +132,3 @@ class SetupViewModel : ViewModel() {
         _uiState.value = transform(_uiState.value)
     }
 }
-

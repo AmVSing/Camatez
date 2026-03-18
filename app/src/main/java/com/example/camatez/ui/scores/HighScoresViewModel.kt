@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.stateIn
 class HighScoresViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
-
     private val scoreRepository =
         ScoreRepository(CamatezDatabase.getInstance(application).dailyScoreDao())
 
@@ -30,8 +29,7 @@ class HighScoresViewModel(
                         scores = scores,
                     )
                 }
-            }
-            .stateIn(
+            }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = HighScoresUIState(),

@@ -4,7 +4,7 @@ import androidx.room.Entity
 
 @Entity(
     tableName = "daily_scores",
-    primaryKeys = ["date", "duration"]
+    primaryKeys = ["date", "duration"],
 )
 data class DailyScoreEntity(
     val date: String,

@@ -5,20 +5,20 @@ import kotlin.random.Random
 class QuestionGenerator(
     private val rng: Random = Random.Default,
 ) {
-    fun generate(config: Config): Question {
-        val operation = config.enabledOperations.random(rng)
+    fun generate(settings: Settings): Question {
+        val operation = settings.enabledOperations.random(rng)
 
         return when (operation) {
-            Operation.ADD -> generateAdd(config)
-            Operation.SUBTRACT -> generateSubtract(config)
-            Operation.MULTIPLY -> generateMultiply(config)
-            Operation.DIVIDE -> generateDivide(config)
+            Operation.ADD -> generateAdd(settings)
+            Operation.SUBTRACT -> generateSubtract(settings)
+            Operation.MULTIPLY -> generateMultiply(settings)
+            Operation.DIVIDE -> generateDivide(settings)
         }
     }
 
-    private fun generateAdd(config: Config): Question {
-        val lhs = config.addLhsRange.randint()
-        val rhs = config.addRhsRange.randint()
+    private fun generateAdd(settings: Settings): Question {
+        val lhs = settings.addLhsRange.randint()
+        val rhs = settings.addRhsRange.randint()
 
         return Question(
             lhs = lhs,
@@ -28,11 +28,11 @@ class QuestionGenerator(
         )
     }
 
-    private fun generateSubtract(config: Config): Question {
-        val rhs = config.addRhsRange.randint()
-        val lhsCandidates = config.addLhsRange.filter { it != 0 && it >= rhs }
+    private fun generateSubtract(settings: Settings): Question {
+        val rhs = settings.addRhsRange.randint()
+        val lhsCandidates = settings.addLhsRange.filter { it != 0 && it >= rhs }
         require(lhsCandidates.isNotEmpty()) {
-            "No valid subtraction lhs values for rhs=$rhs in ${config.addLhsRange}"
+            "No valid subtraction lhs values for rhs=$rhs in ${settings.addLhsRange}"
         }
         val lhs = lhsCandidates.random(rng)
 
@@ -44,9 +44,9 @@ class QuestionGenerator(
         )
     }
 
-    private fun generateMultiply(config: Config): Question {
-        val lhs = config.mulLhsRange.randint()
-        val rhs = config.mulRhsRange.randint()
+    private fun generateMultiply(settings: Settings): Question {
+        val lhs = settings.mulLhsRange.randint()
+        val rhs = settings.mulRhsRange.randint()
 
         return Question(
             lhs = lhs,
@@ -56,11 +56,11 @@ class QuestionGenerator(
         )
     }
 
-    private fun generateDivide(config: Config): Question {
-        val rhs = config.mulRhsRange.randint()
-        val lhsCandidates = config.mulLhsRange.filter { it != 0 && it % rhs == 0 }
+    private fun generateDivide(settings: Settings): Question {
+        val rhs = settings.mulRhsRange.randint()
+        val lhsCandidates = settings.mulLhsRange.filter { it != 0 && it % rhs == 0 }
         require(lhsCandidates.isNotEmpty()) {
-            "No valid division lhs values for rhs=$rhs in ${config.mulLhsRange}"
+            "No valid division lhs values for rhs=$rhs in ${settings.mulLhsRange}"
         }
         val lhs = lhsCandidates.random(rng)
 

@@ -35,9 +35,10 @@ fun HighScoresChart(
 
     Box(modifier = modifier) {
         Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 12.dp, vertical = 12.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp, vertical = 12.dp),
         ) {
             val leftPadding = 56f
             val rightPadding = 20f
@@ -83,25 +84,28 @@ fun HighScoresChart(
 
             if (scores.isEmpty()) return@Canvas
 
-            val points = scores.mapIndexed { index, score ->
-                val x = if (scores.size == 1) {
-                    leftPadding + chartWidth / 2f
-                } else {
-                    leftPadding + (index.toFloat() / (scores.lastIndex.toFloat())) * chartWidth
+            val points =
+                scores.mapIndexed { index, score ->
+                    val x =
+                        if (scores.size == 1) {
+                            leftPadding + chartWidth / 2f
+                        } else {
+                            leftPadding + (index.toFloat() / (scores.lastIndex.toFloat())) * chartWidth
+                        }
+
+                    val fraction = (score.score - minScore).toFloat() / (maxScore - minScore).toFloat()
+                    val y = origin.y - fraction * chartHeight
+
+                    Offset(x, y)
                 }
 
-                val fraction = (score.score - minScore).toFloat() / (maxScore - minScore).toFloat()
-                val y = origin.y - fraction * chartHeight
-
-                Offset(x, y)
-            }
-
-            val path = Path().apply {
-                moveTo(points.first().x, points.first().y)
-                for (i in 1 until points.size) {
-                    lineTo(points[i].x, points[i].y)
+            val path =
+                Path().apply {
+                    moveTo(points.first().x, points.first().y)
+                    for (i in 1 until points.size) {
+                        lineTo(points[i].x, points[i].y)
+                    }
                 }
-            }
 
             drawPath(
                 path = path,
@@ -122,19 +126,21 @@ fun HighScoresChart(
         ColumnLabels(
             minScore = minScore,
             maxScore = maxScore,
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .padding(start = 4.dp, top = 20.dp, bottom = 44.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 4.dp, top = 20.dp, bottom = 44.dp),
             textColor = textColor,
         )
 
         // X-axis labels
         if (scores.isNotEmpty()) {
             Row(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(start = 56.dp, end = 20.dp, bottom = 8.dp),
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(start = 56.dp, end = 20.dp, bottom = 8.dp),
             ) {
                 Text(
                     text = scores.first().date,
